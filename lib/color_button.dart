@@ -28,12 +28,6 @@ class _ColorButtonState extends State<ColorButton>
     widget.controller.forward();
   }
 
-  // @override
-  // void dispose() {
-  //   widget.controller.dispose();
-  //   super.dispose();
-  // }
-
   @override
   Widget build(BuildContext context) {
     return ElevatedButton(

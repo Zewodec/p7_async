@@ -1,4 +1,3 @@
-/// Bar chart example
 import 'package:charts_flutter/flutter.dart' as charts;
 import 'package:flutter/material.dart';
 import 'package:p7_async/weather.dart';
@@ -45,7 +44,6 @@ class TempBar extends StatelessWidget {
   }
 }
 
-/// Sample ordinal data type.
 class TempretureModel {
   final String city;
   final double tempreture;
