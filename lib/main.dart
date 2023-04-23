@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:p7_async/color_button.dart';
+import 'package:p7_async/temp_bar.dart';
 import 'package:p7_async/weather.dart';
 import 'package:provider/provider.dart';
 
@@ -19,9 +21,9 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter p7 - Async',
+      title: 'Flutter p9 - Animation',
       theme: Provider.of<ThemeModel>(context).currentTheme,
-      home: const MyHomePage(title: 'Flutter p7 - Async'),
+      home: const MyHomePage(title: 'Flutter p9 - Animation'),
     );
   }
 }
@@ -35,9 +37,30 @@ class MyHomePage extends StatefulWidget {
   State<MyHomePage> createState() => _MyHomePageState();
 }
 
-class _MyHomePageState extends State<MyHomePage> {
+class _MyHomePageState extends State<MyHomePage>
+    with SingleTickerProviderStateMixin {
   final TextEditingController _cityNameController = TextEditingController();
   String _weather = '';
+
+  late AnimationController animationController;
+
+  late final Animation<double> _sizeAnimation =
+      Tween<double>(begin: 340, end: 170).animate(animationController);
+
+  @override
+  void dispose() {
+    animationController.dispose();
+    super.dispose();
+  }
+
+  @override
+  void initState() {
+    animationController = AnimationController(
+      duration: const Duration(seconds: 2),
+      vsync: this,
+    );
+    super.initState();
+  }
 
   void _getWeather() async {
     final cityName = _cityNameController.text;
@@ -51,6 +74,12 @@ class _MyHomePageState extends State<MyHomePage> {
       setState(() {
         _weather = 'Error: $e';
       });
+    }
+
+    if (animationController.isCompleted) {
+      animationController.reverse();
+    } else {
+      animationController.forward();
     }
   }
 
@@ -69,20 +98,26 @@ class _MyHomePageState extends State<MyHomePage> {
               style: TextStyle(fontSize: 24.0),
             ),
             const SizedBox(height: 16.0),
-            SizedBox(width: 340,
-              child: TextField(
-                controller: _cityNameController,
-                decoration: const InputDecoration(
-                  hintText: 'Enter city name',
-                  border: OutlineInputBorder(),
-                ),
-              ),
-            ),
+            AnimatedBuilder(
+                animation: animationController,
+                builder: (context, child) {
+                  return SizedBox(
+                    width: _sizeAnimation.value,
+                    child: TextField(
+                      controller: _cityNameController,
+                      decoration: const InputDecoration(
+                        hintText: 'Enter city name',
+                        border: OutlineInputBorder(),
+                      ),
+                    ),
+                  );
+                }),
             const SizedBox(height: 16.0),
-            ElevatedButton(
-              onPressed: _getWeather,
-              child: const Text('Get Weather'),
-            ),
+            // ElevatedButton(
+            //   onPressed: _getWeather,
+            //   child: const Text('Get Weather'),
+            // ),
+            ColorButton(controller: animationController, onPress: _getWeather),
             const SizedBox(height: 16.0),
             FutureBuilder(
               future: Weather.getWeather(_cityNameController.text),
@@ -92,9 +127,20 @@ class _MyHomePageState extends State<MyHomePage> {
                 } else if (snapshot.hasError) {
                   return Text('Error: ${snapshot.error}');
                 } else {
-                  return Text(
-                    snapshot.data ?? '',
-                    style: const TextStyle(fontSize: 32.0),
+                  return Column(
+                    children: [
+                      Text(
+                        snapshot.data ?? '',
+                        style: const TextStyle(fontSize: 32.0),
+                      ),
+                      SizedBox(
+                        width: 200,
+                        height: 200,
+                        child: Container(
+                          child: TempBar.withSampleData(),
+                        ),
+                      ),
+                    ],
                   );
                 }
               },
